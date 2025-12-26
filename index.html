@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Projekt: Nebelkompass</title>
+
+<style>
+:root{
+  --bg:#0b0f19;
+  --ink:#eaf0ff;
+  --muted:#b8c4e6;
+  --accent:#76f3d6;
+  --danger:#ff5b7a;
+  --ok:#7cff8a;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:
+    radial-gradient(1000px 500px at 10% 10%,rgba(118,243,214,.15),transparent 60%),
+    radial-gradient(900px 500px at 90% 20%,rgba(138,164,255,.15),transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  min-height:100svh;
+  padding:20px 14px 40px;
+  display:flex;
+  justify-content:center;
+}
+.wrap{width:min(760px,100%)}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+h1{margin:0;font-size:clamp(22px,5vw,34px)}
+.pill{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(16,25,47,.6);
+  font-size:12px;
+}
+.card{
+  margin-top:14px;
+  background:rgba(16,25,47,.65);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--radius);
+  padding:18px 16px;
+  box-shadow:var(--shadow);
+}
+.intro{
+  font-size:15px;
+  line-height:1.45;
+  color:var(--muted);
+}
+.divider{height:1px;background:rgba(255,255,255,.12);margin:14px 0}
+
+.stage{
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(6,10,18,.4);
+  position:relative;
+}
+.stage.locked::after{
+  content:"🔒";
+  position:absolute;
+  top:10px;right:12px;
+}
+.stage h2{margin:0 0 6px;font-size:18px}
+.stage p{margin:0 0 12px;color:var(--muted);font-size:14px}
+
+.riddle{
+  background:rgba(16,25,47,.6);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:12px;
+}
+.riddle .text{font-size:14px;line-height:1.45}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+input{
+  flex:1;
+  min-width:180px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(6,10,18,.5);
+  color:var(--ink);
+  font-size:16px;
+}
+button{
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background:linear-gradient(180deg,rgba(118,243,214,.25),rgba(138,164,255,.12));
+  color:var(--ink);
+  font-weight:700;
+}
+button.secondary{background:rgba(16,25,47,.6);color:var(--muted)}
+
+.hint{
+  display:none;
+  margin-top:10px;
+  padding:10px 12px;
+  border-left:3px solid var(--accent);
+  background:rgba(118,243,214,.1);
+  border-radius:12px;
+  font-size:13px;
+  color:var(--muted);
+}
+.msg{min-height:18px;font-size:13px;margin-top:6px}
+.msg.ok{color:var(--ok)}
+.msg.bad{color:var(--danger)}
+
+.reveal{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(118,243,214,.3);
+  background:rgba(118,243,214,.1);
+}
+.reveal a{color:var(--accent);text-decoration:none}
+
+.secret{
+  display:none;
+  margin-top:18px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(6,10,18,.45);
+}
+.letter{
+  margin-top:10px;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(16,25,47,.6);
+  border:1px solid rgba(255,255,255,.12);
+  font-family:ui-monospace,monospace;
+  font-size:13px;
+  white-space:pre-wrap;
+}
+footer{margin-top:16px;font-size:12px;color:var(--muted)}
+canvas{position:fixed;inset:0;pointer-events:none}
+</style>
+</head>
+
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="wrap">
+  <header>
+    <h1>🧭 Projekt: Nebelkompass</h1>
+    <div class="pill">Fortschritt: <b id="progress">0/3</b></div>
+  </header>
+
+  <div class="card">
+
+    <div class="intro">
+      <b>Nachricht an Nico & Simon:</b><br><br>
+      Wenn ihr das hier lest, hat euch der <b>Nebelkompass</b> gefunden.
+      Das passiert nicht zufällig.<br><br>
+      In Basel sind Dinge passiert, die man nicht einfach Erwachsenen überlassen kann.<br><br>
+      Drei Siegel prüfen: <b>Verstand</b>, <b>Aufmerksamkeit</b> und <b>Mut</b>.<br><br>
+      Erst wenn alle offen sind, wisst ihr, was wirklich auf euch wartet.<br><br>
+      <b>Regel:</b> Antworten in <b>GROSSBUCHSTABEN</b>. Teamwork ist Pflicht.
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- STAGE 1 -->
+    <section class="stage locked" id="s1">
+      <h2>🦴 Siegel I – Der Knochenflüsterer</h2>
+      <div class="riddle">
+        <div class="text">
+          Ich bin ein Riese, doch kein Elefant.<br>
+          Ich habe Zähne, doch kein Zahnarzt.<br>
+          Ich lebte lange vor euch.<br><br>
+          <b>Was bin ich?</b>
+        </div>
+        <div class="row">
+          <input id="a1" placeholder="Antwort">
+          <button onclick="check(1)">Öffnen</button>
+          <button class="secondary" onclick="showHint(1)">Hinweis</button>
+        </div>
+        <div class="hint" id="h1">Vier Buchstaben. Beginnt mit <b>D</b>.</div>
+        <div class="msg" id="m1"></div>
+        <div class="reveal" id="r1">
+          <b>Mission 1:</b> Naturhistorisches Museum Basel<br>
+          • <a href="https://www.museenbasel.ch/de/museen/naturhistorisches-museum-basel/dino-amp-saurier-lebendige-bilder-vergangener-tage" target="_blank" rel="noopener">Dino & Saurier</a><br>
+          • <a href="https://www.museenbasel.ch/de/museen/naturhistorisches-museum-basel/wal-amp-fisch-sanfte-riesen-der-meere" target="_blank" rel="noopener">Wal & Fisch</a><br>
+          • <a href="https://www.museenbasel.ch/de/museen/naturhistorisches-museum-basel/mammut-amp-saebelzahntiger-evolution-des-menschen-in-einem-land-vor-unserer-zeit" target="_blank" rel="noopener">Mammut & Säbelzahntiger</a><br><br>
+          <b>Codename:</b> „Zeitreise im Doppeldeckerhirn“
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 2 -->
+    <section class="stage locked" id="s2" style="opacity:.55">
+      <h2>🕵️ Siegel II – Die Spur im Stadtnebel</h2>
+      <div class="riddle">
+        <div class="text">
+          Gesucht ist ein Wort aus zwei Teilen:<br><br>
+          <b>Teil A:</b> Schlaues Tier, oft rot, legt Spuren. 🦊<br>
+          <b>Teil B:</b> Ein Weg, dem man folgt (englisch). 🧭<br><br>
+          <b>Teil A + Teil B</b>, ohne Leerzeichen.
+        </div>
+        <div class="row">
+          <input id="a2" placeholder="Antwort (TeilA+TeilB)">
+          <button onclick="check(2)">Öffnen</button>
+          <button class="secondary" onclick="showHint(2)">Hinweis</button>
+        </div>
+        <div class="hint" id="h2"><b>FOX</b> + <b>TRAIL</b></div>
+        <div class="msg" id="m2"></div>
+        <div class="reveal" id="r2">
+          <b>Mission 2:</b> Foxtrail Basel – CYAN<br>
+          • <a href="https://foxtrail.ch/produkte/trails/basel-und-umgebung/cyan/" target="_blank" rel="noopener">Trail ansehen</a><br><br>
+          <b>Codename:</b> „Der Fuchs weiss immer mehr als wir“
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 3 -->
+    <section class="stage locked" id="s3" style="opacity:.55">
+      <h2>🤝 Siegel III – Das Team-Siegel</h2>
+      <div class="riddle">
+        <div class="text">
+          Letztes Siegel.<br>
+          Dieses Rätsel kann niemand alleine lösen.<br><br>
+          Zwei Köpfe.<br>
+          Eine Mission.<br><br>
+          Wenn einer denkt und der andere zuhört, kommt man weiter.<br><br>
+          <b>Frage:</b><br>
+          Wie nennt man das, wenn man etwas <b>zusammen</b> schafft?
+        </div>
+        <div class="row">
+          <input id="a3" placeholder="Antwort">
+          <button onclick="check(3)">Öffnen</button>
+          <button class="secondary" onclick="showHint(3)">Hinweis</button>
+        </div>
+        <div class="hint" id="h3">Englisches Wort. Wird oft bei Teams benutzt. (Noch klarer: TEAM + WORK)</div>
+        <div class="msg" id="m3"></div>
+
+        <!-- Mini-Feedback (nur Siegel 3) -->
+        <div class="msg ok" id="miniFeedback3" style="display:none; font-weight:600; font-family: ui-monospace, monospace;">
+          Analyse abgeschlossen.<br>
+          Kooperation bestätigt.<br>
+          Status: TEAM BEREIT.
+        </div>
+
+        <div class="reveal" id="r3">
+          <b>Mission 3:</b> UrbanMission – Agentenjagd Basel<br>
+          • <a href="https://urbanmissions.games/schweiz/basel/outdoor-escape-game-urbanmission-city-family-agentenjagd-basel/" target="_blank" rel="noopener">Mission ansehen</a><br><br>
+          <b>Codename:</b> „Operation: Basel bleibt geheim“
+        </div>
+      </div>
+    </section>
+
+    <!-- SECRET -->
+    <section class="secret" id="secret">
+      <h2>🧾 Geheimer Agentenbrief</h2>
+      <div class="letter" id="letter"></div>
+    </section>
+
+    <footer>
+      🧩 Tipp: Wer tippt, wechselt sich ab. Gute Agenten arbeiten im Team.
+    </footer>
+
+  </div>
+</div>
+
+<script>
+/* ===== Answers ===== */
+const ANSWERS = {
+  1: ["DINO"],
+  2: ["FOXTRAIL"],
+  3: ["TEAMWORK"]
+};
+
+/* ===== State ===== */
+let state = JSON.parse(localStorage.getItem("nebel_state") || "null") || [0,0,0];
+
+function save(){ localStorage.setItem("nebel_state", JSON.stringify(state)); }
+function norm(x){ return (x||"").trim().toUpperCase(); }
+
+function showHint(i){
+  const el = document.getElementById("h"+i);
+  el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function render(){
+  document.getElementById("progress").textContent = state.filter(Boolean).length + "/3";
+
+  // stage reveals and locks
+  [1,2,3].forEach(i=>{
+    document.getElementById("r"+i).style.display = state[i-1] ? "block" : "none";
+    document.getElementById("s"+i).classList.toggle("locked", !state[i-1]);
+
+    if(i > 1){
+      const unlockedPrev = !!state[i-2];
+      document.getElementById("s"+i).style.opacity = unlockedPrev ? "1" : ".55";
+      document.getElementById("a"+i).disabled = !unlockedPrev;
+
+      // disable the "Öffnen" button if locked
+      const openBtn = document.querySelectorAll(`#s${i} button`)[0];
+      openBtn.disabled = !unlockedPrev;
+    }
+  });
+
+  // secret letter
+  if(state.every(Boolean)){
+    document.getElementById("secret").style.display = "block";
+    document.getElementById("letter").textContent = makeLetter();
+  } else {
+    document.getElementById("secret").style.display = "none";
+  }
+}
+
+function makeLetter(){
+  return [
+    "— GEHEIME ÜBERTRAGUNG —",
+    "",
+    "An die neuen Feldagenten:",
+    "NICO & SIMON",
+    "",
+    "Ihr habt alle drei Siegel geöffnet.",
+    "Das bedeutet: Ihr habt gesehen, was andere übersehen.",
+    "",
+    "Ab diesem Moment gilt:",
+    "Ihr seid keine Zuschauer mehr.",
+    "Ihr seid Teil der Operation.",
+    "",
+    "Eure Einsätze:",
+    "",
+    "EINSATZ 1 – WISSEN",
+    "Versteht die Riesen der Vergangenheit.",
+    "",
+    "EINSATZ 2 – SPUREN",
+    "Folgt Hinweisen in der Stadt. Schaut genauer hin als andere.",
+    "",
+    "EINSATZ 3 – FELDMISSION",
+    "Bewegt euch durch Basel, ohne aufzufallen.",
+    "Löst Aufgaben. Trefft Entscheidungen.",
+    "",
+    "Einsatzleitung:",
+    "AGENT P und AGENT A",
+    "",
+    "Eure erste echte Mission startet,",
+    "sobald ihr uns drei mögliche Einsatzdaten nennt.",
+    "",
+    "Geheimwort für Missionsbeginn:",
+    "AGENTEN IM EINSATZ",
+    "",
+    "Diese Nachricht löscht sich nicht selbst.",
+    "Aber sie wird beobachtet.",
+    "",
+    "— EINSATZLEITUNG —"
+  ].join("\n");
+}
+
+function check(i){
+  // gating
+  if(i === 2 && !state[0]) return;
+  if(i === 3 && !state[1]) return;
+
+  const val = norm(document.getElementById("a"+i).value);
+  const msg = document.getElementById("m"+i);
+
+  if(ANSWERS[i].includes(val)){
+    state[i-1] = 1;
+    save();
+
+    msg.textContent = "Siegel geöffnet.";
+    msg.className = "msg ok";
+
+    // Mini-Feedback only on stage 3
+    if(i === 3){
+      const fb = document.getElementById("miniFeedback3");
+      fb.style.display = "block";
+
+      setTimeout(() => {
+        fb.style.display = "none";
+        render();
+        boomConfetti();
+      }, 2200);
+    } else {
+      render();
+      boomConfetti();
+    }
+  } else {
+    msg.textContent = "Falsche Spur. Versuch es erneut.";
+    msg.className = "msg bad";
+  }
+}
+
+/* ===== Confetti (simple, offline) ===== */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+let confettiTimer = null;
+
+function boomConfetti(){
+  clearTimeout(confettiTimer);
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  for(let i=0;i<140;i++){
+    ctx.fillStyle = `hsl(${Math.random()*360},90%,70%)`;
+    ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height*0.35, 4, 4);
+  }
+  confettiTimer = setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height), 550);
+}
+
+render();
+</script>
+</body>
+</html>
